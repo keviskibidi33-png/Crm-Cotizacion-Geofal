@@ -212,6 +212,56 @@ export function QuoteBuilderPage() {
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
   }
 
+  // Function to add an ensayo and its related ensayos
+  function addEnsayoWithRelated(idx: number, ensayo: EnsayoItem) {
+    // First, update the current item
+    updateItem(idx, {
+      codigo: ensayo.codigo,
+      descripcion: ensayo.descripcion,
+      norma: ensayo.norma,
+      acreditado: ensayo.acreditado,
+      costo_unitario: ensayo.precio,
+      ensayoData: ensayo,
+    });
+
+    // Then, add related ensayos if any
+    if (ensayo.codigosRelacionados && ensayo.codigosRelacionados.length > 0) {
+      const relatedEnsayos = getEnsayosRelacionados(ensayo.codigo);
+      
+      if (relatedEnsayos.length > 0) {
+        // Get current items to check for duplicates
+        setItems((prev) => {
+          const existingCodes = new Set(prev.map(it => it.codigo));
+          const newItems: QuoteItem[] = [];
+          
+          for (const related of relatedEnsayos) {
+            // Don't add if already exists in the quote
+            if (!existingCodes.has(related.codigo)) {
+              newItems.push({
+                codigo: related.codigo,
+                descripcion: related.descripcion,
+                norma: related.norma,
+                acreditado: related.acreditado,
+                costo_unitario: related.precio,
+                cantidad: 1,
+                ensayoData: related,
+              });
+              existingCodes.add(related.codigo); // Prevent duplicates within related
+            }
+          }
+          
+          if (newItems.length > 0) {
+            // Insert related items after the current item
+            const result = [...prev];
+            result.splice(idx + 1, 0, ...newItems);
+            return result;
+          }
+          return prev;
+        });
+      }
+    }
+  }
+
   function addItem() {
     setItems((prev) => [
       ...prev,
@@ -636,14 +686,7 @@ export function QuoteBuilderPage() {
                           value={it.codigo}
                           onChange={(value) => updateItem(idx, { codigo: value })}
                           onSelect={(ensayo: EnsayoItem) => {
-                            updateItem(idx, {
-                              codigo: ensayo.codigo,
-                              descripcion: ensayo.descripcion,
-                              norma: ensayo.norma,
-                              acreditado: ensayo.acreditado,
-                              costo_unitario: ensayo.precio,
-                              ensayoData: ensayo,
-                            });
+                            addEnsayoWithRelated(idx, ensayo);
                           }}
                           suggestions={ensayosData}
                           placeholder="Código"
@@ -656,14 +699,7 @@ export function QuoteBuilderPage() {
                           value={it.descripcion}
                           onChange={(value) => updateItem(idx, { descripcion: value })}
                           onSelect={(ensayo: EnsayoItem) => {
-                            updateItem(idx, {
-                              codigo: ensayo.codigo,
-                              descripcion: ensayo.descripcion,
-                              norma: ensayo.norma,
-                              acreditado: ensayo.acreditado,
-                              costo_unitario: ensayo.precio,
-                              ensayoData: ensayo,
-                            });
+                            addEnsayoWithRelated(idx, ensayo);
                           }}
                           suggestions={ensayosData}
                           placeholder="Descripción"

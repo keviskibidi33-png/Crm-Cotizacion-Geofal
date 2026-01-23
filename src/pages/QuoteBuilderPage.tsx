@@ -291,7 +291,10 @@ export function QuoteBuilderPage() {
       const resp = await fetch(`${apiBaseUrl}/clientes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCliente),
+        body: JSON.stringify({
+          ...newCliente,
+          vendedor_id: urlParams.user_id || currentUser?.id,
+        }),
       });
       const data = await resp.json();
       if (data.data) {
@@ -523,11 +526,12 @@ export function QuoteBuilderPage() {
               <Input
                 value={proyectoSearch}
                 onChange={(e) => { setProyectoSearch(e.target.value); setShowProyectoDropdown(true); }}
-                onFocus={() => { if (proyectos.length > 0) setShowProyectoDropdown(true); }}
+                onFocus={() => { if (selectedCliente) setShowProyectoDropdown(true); }}
+                onClick={() => { if (selectedCliente) setShowProyectoDropdown(true); }}
                 placeholder={selectedCliente ? "Buscar proyecto..." : "Selecciona cliente primero"}
                 disabled={!selectedCliente}
               />
-              {showProyectoDropdown && proyectos.length > 0 && (
+              {showProyectoDropdown && selectedCliente && (
                 <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-auto">
                   {proyectos.map(p => (
                     <div key={p.id} onClick={() => selectProyecto(p)} className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-sm">
@@ -542,7 +546,7 @@ export function QuoteBuilderPage() {
                       {p.ubicacion && <div className="text-xs text-slate-500">{p.ubicacion}</div>}
                     </div>
                   ))}
-                  <div onClick={() => { setShowNewProyectoModal(true); setShowProyectoDropdown(false); }} className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm text-blue-600 border-t">
+                  <div onClick={() => { setShowNewProyectoModal(true); setShowProyectoDropdown(false); }} className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm text-blue-600 border-t font-medium sticky bottom-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
                     <Plus className="inline h-3 w-3 mr-1" /> Crear nuevo proyecto
                   </div>
                 </div>

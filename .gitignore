@@ -1,5 +1,42 @@
-node_modules
-.dist
-.dist-ssr
+# Dependencies
+node_modules/
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Build outputs
+dist/
+.dist/
+.dist-ssr/
+*.tsbuildinfo
+
+# Environment files
 *.local
+.env
+.env.local
+.env.production
+!.env.example
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Next.js (crm-geofal)
+.next/
+
+# Logs
+*.log
+npm-debug.log*

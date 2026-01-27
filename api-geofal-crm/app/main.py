@@ -1685,7 +1685,7 @@ async def get_condiciones(search: str = ""):
         conn = _get_connection()
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             query = """
-                SELECT id, texto, categoria, orden, created_at
+                SELECT id, texto, categoria, orden, created_by, created_at
                 FROM condiciones_especificas
                 WHERE activo = true
             """
@@ -1721,13 +1721,14 @@ async def create_condicion(data: dict):
         conn = _get_connection()
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute("""
-                INSERT INTO condiciones_especificas (texto, categoria, orden, activo)
-                VALUES (%s, %s, %s, %s)
-                RETURNING id, texto, categoria, orden, created_at
+                INSERT INTO condiciones_especificas (texto, categoria, orden, created_by, activo)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id, texto, categoria, orden, created_by, created_at
             """, (
                 data.get('texto', ''),
                 data.get('categoria', ''),
                 data.get('orden', 0),
+                data.get('vendedor_id'),  # created_by = vendedor_id
                 True
             ))
             result = cur.fetchone()
